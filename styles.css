@@ -83,7 +83,7 @@
 .cap-card:hover p,.cap-card:hover a,.cap-card:focus-within p,.cap-card:focus-within a,.cap-card:focus-visible p,.cap-card:focus-visible a{opacity:1;transform:none}
 
 /* White four-column mega menu */
-.menu-panel{position:fixed;inset:0;z-index:90;display:grid;grid-template-columns:repeat(4,1fr);gap:0;padding:150px 5vw 70px;background:#fff;color:var(--ink)}
+.menu-panel{position:fixed;inset:0;z-index:90;display:grid;grid-template-columns:repeat(4,1fr);align-items:start;gap:0;padding:150px 5vw 70px;background:#fff;color:var(--ink)}
 .site-header:has(.menu-panel.open)>.brand,.site-header:has(.menu-panel.open)>.hamburger{position:relative;z-index:100}
 .menu-column{display:flex;flex-direction:column;gap:0;padding:0 38px;border-right:1px solid #e4e7e5}.menu-column:first-child{padding-left:0}.menu-column:last-child{border-right:0}.menu-column h2{margin:0 0 34px;font-size:30px;line-height:38px}.menu-column>a:not(.btn-box){display:flex;align-items:center;justify-content:space-between;gap:18px;padding:17px 0;color:var(--ink);font-size:17px}.menu-column>a i{font-size:12px}.menu-column p{margin:0 0 20px;color:#707673}.menu-column--contact .btn-box{margin-top:32px;color:#fff}.site-header:has(.menu-panel.open){color:var(--ink)}.site-header:has(.menu-panel.open) .brand img{filter:none}.site-header:has(.menu-panel.open) .hamburger span{background:var(--ink)}
 
@@ -108,3 +108,4 @@
 @media(min-width:1001px){.product-grid article{flex-basis:42%}}
 .slider-nav-btn:hover:not(:disabled){background:var(--ink);color:#fff;transform:translateY(-2px)}
 .slider-nav-btn:disabled{cursor:not-allowed;opacity:.35}
+.site-header:has(.menu-panel.open){z-index:110;top:0;color:var(--ink)}
