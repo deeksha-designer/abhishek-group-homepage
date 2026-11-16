@@ -2,7 +2,7 @@ const header=document.querySelector('.site-header');
 addEventListener('scroll',()=>header.classList.toggle('scrolled',scrollY>40),{passive:true});
 
 const hamburger=document.querySelector('.hamburger'),menuPanel=document.querySelector('.menu-panel');
-function setMenu(open){hamburger.setAttribute('aria-expanded',String(open));hamburger.setAttribute('aria-label',open?'Close menu':'Open menu');menuPanel.hidden=!open;menuPanel.classList.toggle('open',open);document.body.classList.toggle('menu-open',open)}
+function setMenu(open){hamburger.setAttribute('aria-expanded',String(open));hamburger.setAttribute('aria-label',open?'Close menu':'Open menu');menuPanel.inert=!open;menuPanel.setAttribute('aria-hidden',String(!open));menuPanel.classList.toggle('open',open);document.body.classList.toggle('menu-open',open)}
 hamburger.addEventListener('click',()=>setMenu(hamburger.getAttribute('aria-expanded')!=='true'));
 menuPanel.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>setMenu(false)));
 document.addEventListener('keydown',event=>{if(event.key==='Escape')setMenu(false)});
