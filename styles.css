@@ -112,3 +112,62 @@
 .slider-nav-btn:disabled{cursor:not-allowed;opacity:.35}
 .site-header:has(.menu-panel.open){z-index:110;top:0;color:var(--ink)}
 .menu-panel:not(.open){display:none;pointer-events:none}
+
+/* November refinement: one global frame and a consistent vertical rhythm */
+:root{--pad:160px;--section-space:100px}
+.shell{width:100%;max-width:none;margin-inline:auto;padding-inline:var(--pad)}
+.section{padding-block:var(--section-space)}
+.story-video.section,.companies.section,.products.section,.world-presence.section,.leadership.section,.news.section,.customers.section,.contact.section{padding-block:var(--section-space)}
+.hero-copy h1,.hero-copy h2,.mobis-hero .hero-copy h1{font-size:64px;line-height:70px}
+
+/* Reference-matched mega menu proportions */
+.menu-panel{align-items:start;padding:158px 160px 70px}
+.menu-column{min-height:655px;padding:0 40px;border-right:1px solid #dedfdf}
+.menu-column:first-child{padding-left:78px}.menu-column:last-child{padding-right:0;border-right:0}
+.menu-column h2{margin-bottom:36px;font-size:30px;line-height:1.25}
+.menu-column>a:not(.btn-box){padding:14px 0;font-size:18px;line-height:1.45}
+.menu-column--contact p{margin-top:2px}
+.site-header:has(.menu-panel.open) .desktop-nav{visibility:hidden}
+.site-header:has(.menu-panel.open) .hamburger{width:46px;height:46px;border:2px solid var(--ink)}
+
+/* Mobis-style hero routes requested by the client */
+.mobis-hero .hero-routes b{position:static;margin-top:18px;font-size:13px;color:rgb(248 155 9);font-weight:500}
+.hero-routes b{opacity:1}
+.hero-routes a:hover strong,.hero-routes a:focus-visible strong{font-size:28px;transform:none}
+.mobis-hero .hero-routes strong{font-size:20px}
+@media(min-width:651px){.mobis-hero .slide-dots button.active span{display:none}}
+
+/* Seven-company industrial portfolio */
+.company-intro{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr);gap:80px;align-items:end;margin-bottom:58px}
+.company-intro h2{margin:0;font-size:64px;line-height:70px}.company-intro p{max-width:540px;margin:0 0 6px}
+.company-portfolio{grid-template-columns:360px minmax(0,1fr);gap:0;min-height:690px;background:#f3f4f3}
+.company-sidebar{position:relative;z-index:2;padding:30px 0 30px 34px;background:#111416}
+.company-nav button{min-height:84px;padding:18px 54px 18px 0;border-bottom:1px solid #323638;color:#aeb3b0;font-size:16px}
+.company-nav button.active{color:#fff}.company-nav button.active:before{content:"";display:block;position:absolute;left:-34px;top:0;bottom:0;width:5px;background:var(--orange)}
+.company-nav button:after{color:var(--orange)}
+.company-showcase{min-height:690px}.company-showcase figure:after{inset:25% 0 0}.company-showcase .company-copy{left:58px;right:58px;bottom:52px}
+.company-showcase .company-copy h3{font-size:54px;line-height:1.05}.company-showcase .company-lockup{display:flex;justify-content:space-between;align-items:center}
+
+/* Leadership as a strong editorial split */
+.leadership{background:#f2f3f2}.leadership-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,.72fr);grid-template-areas:"title image" "copy image";gap:50px 90px;align-items:start}
+.leadership-title{grid-area:title;padding-top:24px}.leadership-title h2{margin:0 0 28px;font-size:64px;line-height:70px}.leadership-title p{max-width:600px;margin:0}
+.leadership-grid .leader-copy{grid-area:copy;padding:42px 50px 42px 0;border-top:5px solid var(--orange)}
+.leadership-grid figure{grid-area:image;margin:0}.leadership-grid figure img{width:100%;height:720px;object-fit:cover;object-position:center top}
+.leader-name h3{font-size:32px}.leader-name strong{display:block;margin-top:5px;color:var(--orange)}
+
+/* Two-direction customer logo wall */
+.customer-head{display:grid;grid-template-columns:1.15fr .85fr;gap:90px;align-items:end;margin-bottom:62px}.customer-head h2{margin:0;font-size:64px;line-height:70px}.customer-head>div{padding-bottom:6px}.customer-head p{max-width:540px;margin:0 0 20px}
+.logo-marquees{overflow:hidden;display:grid;gap:14px}.logo-track{display:flex;width:max-content;animation:logoForward 34s linear infinite}.logo-track--reverse{animation-name:logoReverse;animation-duration:38s}.logo-set{display:flex;gap:14px;padding-right:14px}
+.logo-set>span{display:grid;place-items:center;width:250px;height:150px;padding:30px;background:#f2f3f2;color:#151819;font-size:23px;font-weight:650;text-align:center}.logo-set img{max-width:180px;max-height:70px;object-fit:contain}
+.logo-track:hover{animation-play-state:paused}@keyframes logoForward{to{transform:translateX(-50%)}}@keyframes logoReverse{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+
+/* Detailed brand footer */
+.site-footer{padding:100px 0 0;background:#111416;color:#fff}.site-footer .shell{position:relative}.footer-top{display:grid;grid-template-columns:1.2fr .8fr;gap:100px;padding-bottom:76px;border-bottom:1px solid #383c3d}.footer-brand{color:#fff}.footer-brand img{filter:brightness(0) invert(1)}
+.footer-statement h2{margin:68px 0 26px;color:#fff;font-size:64px;line-height:70px}.footer-statement p{max-width:670px;color:#c7ccca}.footer-contact{align-self:end;padding:38px;background:var(--orange)}.footer-contact span{display:block;margin-bottom:54px;font-size:14px}.footer-contact a{display:flex;justify-content:space-between;gap:25px;color:#fff;font-size:21px;font-weight:650}.footer-contact p{margin:24px 0 0;color:#fff}
+.footer-links{display:grid;grid-template-columns:repeat(4,1fr);gap:55px;padding:62px 0}.footer-links nav{display:flex;flex-direction:column;gap:16px}.footer-links strong,.footer-social>strong{display:block;margin-bottom:12px;color:#858b88;font-size:14px}.footer-links a{color:#fff}.footer-links a:hover{color:var(--orange)}.footer-social{display:block;margin:0}.footer-social>div{display:flex;gap:12px}.footer-social a{border-color:#4b504e;color:#fff}
+.footer-base{display:grid;grid-template-columns:1fr auto auto;gap:40px;margin:0;padding:24px 0;border-top:1px solid #383c3d;color:#959b98;font-size:12px}.footer-base a{color:inherit}.footer-wordmark{margin-top:28px;color:#1c2021;font-size:15.5vw;line-height:.76}
+
+@media(max-width:1200px){:root{--pad:64px}.menu-panel{padding-inline:64px}.menu-column:first-child{padding-left:20px}.company-portfolio{grid-template-columns:300px minmax(0,1fr)}.leadership-grid{gap:50px}.footer-contact a{font-size:17px}}
+@media(max-width:1000px){:root{--pad:36px}.menu-panel{grid-template-columns:1fr 1fr;padding:120px 36px 40px}.menu-column{min-height:auto}.company-intro,.customer-head,.leadership-grid{grid-template-columns:1fr}.company-portfolio{grid-template-columns:1fr}.company-sidebar{padding:25px}.company-nav{grid-template-columns:1fr 1fr}.company-showcase{min-height:620px}.leadership-grid{grid-template-areas:"title" "image" "copy"}.leadership-grid figure img{height:620px}.footer-top{grid-template-columns:1fr}.footer-contact{max-width:620px}.footer-links{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){:root{--pad:20px;--section-space:72px}.shell{padding-inline:var(--pad)}.hero-copy h1,.hero-copy h2,.mobis-hero .hero-copy h1{font-size:46px;line-height:52px}.menu-panel{padding:92px 20px 30px}.menu-column:first-child{padding-left:0}.company-intro{gap:24px;margin-bottom:36px}.company-intro h2,.leadership-title h2,.customer-head h2,.footer-statement h2{font-size:40px;line-height:46px}.company-sidebar{padding:18px 20px}.company-nav{grid-template-columns:1fr}.company-nav button.active:before{left:-20px}.company-showcase{min-height:560px}.company-showcase .company-copy{left:24px;right:24px;bottom:28px}.company-showcase .company-copy h3{font-size:36px}.leadership-grid figure img{height:500px}.leadership-grid .leader-copy{padding-right:0}.customer-head{gap:24px;margin-bottom:38px}.logo-set>span{width:180px;height:110px;padding:20px;font-size:18px}.logo-set img{max-width:140px;max-height:58px}.site-footer{padding-top:72px}.footer-top{gap:48px}.footer-statement h2{margin-top:48px}.footer-contact{padding:26px}.footer-contact span{margin-bottom:32px}.footer-contact a{font-size:15px}.footer-links{grid-template-columns:1fr 1fr;gap:42px 28px}.footer-base{grid-template-columns:1fr;gap:12px}.footer-wordmark{font-size:22vw}}
+@media(prefers-reduced-motion:reduce){.logo-track{animation:none}}
