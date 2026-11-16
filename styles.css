@@ -109,3 +109,4 @@
 .slider-nav-btn:hover:not(:disabled){background:var(--ink);color:#fff;transform:translateY(-2px)}
 .slider-nav-btn:disabled{cursor:not-allowed;opacity:.35}
 .site-header:has(.menu-panel.open){z-index:110;top:0;color:var(--ink)}
+.menu-panel:not(.open){display:none;pointer-events:none}
