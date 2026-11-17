@@ -222,7 +222,6 @@
 .ag-map .ag-map__card>div{padding:0}
 .ag-map .ag-map__address{margin-bottom:0!important}
 .ag-map .ag-map__card.is-empty{grid-template-columns:1fr}
-.ag-footer__mark span{will-change:transform,opacity;transition:transform .12s linear}
 
 /* --------------------------------------------------------------------------
    7. Chairman — editorial quote card
@@ -289,8 +288,8 @@
 .ag-footer__base>a{display:inline-flex;align-items:center;gap:8px;padding-right:0;color:var(--ag-orange);font-size:11px;text-transform:uppercase;letter-spacing:.02em}
 .ag-footer__base>a:hover{color:#fff}
 section#companies{padding-top:0}
-.ag-footer__mark{position:relative;padding:clamp(40px,6vw,96px) 0 clamp(32px,4vw,64px);background:#fff;overflow:hidden;pointer-events:none}
-.ag-footer__mark-inner{display:flex;justify-content:center}
+.ag-footer__mark{position:relative;height:calc(var(--ag-mark-size,11vw)*.98 + clamp(72px,10vw,160px));background:#fff;clip-path:inset(0);pointer-events:none}
+.ag-footer__mark-inner{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;padding-bottom:clamp(32px,4vw,64px);background:#fff}
 .ag-footer__mark span{display:block;padding:.04em .02em;background:linear-gradient(180deg,#bdbdbd 0%,#d9d9d9 55%,#f1f1f1 100%);-webkit-background-clip:text;background-clip:text;color:transparent;font-size:var(--ag-mark-size,11vw);line-height:.9;font-weight:800;letter-spacing:-.05em;white-space:nowrap}
 
 /* --------------------------------------------------------------------------

@@ -91,8 +91,5 @@ if('IntersectionObserver'in window){const io=new IntersectionObserver(es=>{if(es
 /* ---------- Footer wordmark: fill the viewport width ---------- */
 (()=>{const mark=document.querySelector('.ag-footer__mark');if(!mark)return;const text=mark.querySelector('span');
 const fitMark=()=>{text.style.fontSize='100px';const w=text.getBoundingClientRect().width||1,target=document.documentElement.clientWidth*.97,px=100*target/w;mark.style.setProperty('--ag-mark-size',px+'px');text.style.fontSize='';mark.style.setProperty('--ag-mark-h',(px*.74)+'px')};
-fitMark();addEventListener('resize',fitMark,{passive:true});if(document.fonts)document.fonts.ready.then(fitMark);
-if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-let ticking=false;const rise=()=>{ticking=false;const r=mark.getBoundingClientRect(),p=Math.min(1,Math.max(0,(innerHeight-r.top)/(r.height*.9)));text.style.transform=`translateY(${((1-p)*70).toFixed(2)}%)`;text.style.opacity=(.1+.9*p).toFixed(3)};
-addEventListener('scroll',()=>{if(!ticking){ticking=true;requestAnimationFrame(rise)}},{passive:true});rise()})();
+fitMark();addEventListener('resize',fitMark,{passive:true});if(document.fonts)document.fonts.ready.then(fitMark);})();
 })();
