@@ -45,7 +45,7 @@ const data=[...locations].sort((a,b)=>(b[3]==='Head Office')-(a[3]==='Head Offic
 const unique=key=>[...new Set(data.map(d=>d[key]))].sort();
 for(const[key,select]of Object.entries(selects))unique(key).forEach(v=>select.add(new Option(v,v)));
 let visible=data,pos=0,map=null;
-const INDIA=[[67.6,6.4],[97.5,35.7]];
+const INDIA=[[67.6,6.4],[97.5,37.3]];
 const pad=()=>innerWidth>900?{top:60,bottom:30,left:30,right:Math.min(380,stage.clientWidth*.34)}:{top:56,bottom:20,left:16,right:16};
 function fly(list,ms=1200){if(!map)return;let b=INDIA;
   if(list.length&&list.length<data.length){const lats=list.map(d=>d.lat),lngs=list.map(d=>d.lon);b=[[Math.min(...lngs),Math.min(...lats)],[Math.max(...lngs),Math.max(...lats)]]}
@@ -72,6 +72,9 @@ async function init(){try{const LIB='https://cdn.jsdelivr.net/npm/maplibre-gl@4.
     const world=[[-180,-85],[180,-85],[180,85],[-180,85],[-180,-85]];
     map.addSource('ag-mask',{type:'geojson',data:{type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[world,...outline.features[0].geometry.coordinates.map(p=>p[0])]}}});
     map.addLayer({id:'ag-mask',type:'fill',source:'ag-mask',paint:{'fill-color':'#ffffff','fill-opacity':.62}},below);
+    if(map.getLayer('boundary_disputed'))map.setLayoutProperty('boundary_disputed','visibility','none');
+    map.addSource('ag-india',{type:'geojson',data:outline,attribution:'India boundary: Survey of India via DataMeet'});
+    map.addLayer({id:'ag-india-border',type:'line',source:'ag-india',paint:{'line-color':'hsl(248,1%,41%)','line-width':['interpolate',['linear'],['zoom'],3,.8,8,1.6]}},below);
     map.addSource('ag-loc',{type:'geojson',data:geo()});
     map.addLayer({id:'ag-pulse',type:'circle',source:'ag-loc',paint:{'circle-color':'#fd9907','circle-radius':8,'circle-opacity':.45}});
     map.addLayer({id:'ag-dot',type:'circle',source:'ag-loc',paint:{'circle-color':'#fd9907','circle-radius':['case',['==',['get','active'],1],8,5.5],'circle-stroke-color':'#fff','circle-stroke-width':2}});
