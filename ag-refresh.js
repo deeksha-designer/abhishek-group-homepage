@@ -46,11 +46,11 @@ const unique=key=>[...new Set(data.map(d=>d[key]))].sort();
 for(const[key,select]of Object.entries(selects))unique(key).forEach(v=>select.add(new Option(v,v)));
 legend.innerHTML=Object.entries(COLORS).map(([t,c])=>`<li><span style="background:${c}"></span>${t}</li>`).join('');
 let visible=data,pos=0,globe=null;
-const HOME={lat:22.5,lng:81,altitude:.62};
+const HOME={lat:22.5,lng:81,altitude:.62},SLAB=.02;
 function fly(list,ms=1200){if(!globe)return;if(!list.length||list.length===data.length){globe.pointOfView(HOME,ms);return}
   const lats=list.map(d=>d.lat),lngs=list.map(d=>d.lon),span=Math.max(Math.max(...lats)-Math.min(...lats),Math.max(...lngs)-Math.min(...lngs));
   globe.pointOfView({lat:(Math.max(...lats)+Math.min(...lats))/2,lng:(Math.max(...lngs)+Math.min(...lngs))/2,altitude:Math.min(1.4,Math.max(.45,span/14))},ms)}
-function drawPoints(){if(!globe)return;const active=visible[pos];globe.ringsData(visible);globe.pointsData(visible).pointRadius(d=>d===active?.42:.26).pointAltitude(d=>d===active?.035:.012)}
+function drawPoints(){if(!globe)return;const active=visible[pos];globe.ringsData(visible);globe.pointsData(visible).pointRadius(d=>d===active?.42:.26).pointAltitude(d=>d===active?SLAB+.03:SLAB+.008)}
 function show(){const d=visible[pos];card.classList.toggle('is-empty',!d);
   if(!d){card.querySelector('h3').textContent='No locations found';card.querySelector('.ag-map__meta').textContent='';card.querySelector('.ag-map__address').textContent='Try a different state, location type or company.';drawPoints();return}
   const img=card.querySelector('img');img.src=d.image;img.alt=`${d.company}, ${d.city}`;
@@ -59,19 +59,21 @@ function show(){const d=visible[pos];card.classList.toggle('is-empty',!d);
 function filter(){const f={state:selects.state.value,type:selects.type.value,company:selects.company.value};visible=data.filter(d=>Object.entries(f).every(([k,v])=>v==='all'||d[k]===v));pos=0;countEl.textContent=visible.length;show();fly(visible)}
 Object.values(selects).forEach(s=>s.addEventListener('change',filter));
 filter();
-const loadScript=src=>new Promise((ok,fail)=>{const el=document.createElement('script');el.src=src;el.onload=ok;el.onerror=fail;document.head.append(el)});
 function size(){globe&&globe.width(holder.clientWidth).height(holder.clientHeight)}
-async function init(){try{await loadScript('https://cdn.jsdelivr.net/npm/globe.gl@2.34.4/dist/globe.gl.min.js');
+async function init(){try{const[{default:Globe},THREE]=await Promise.all([import('https://cdn.jsdelivr.net/npm/globe.gl@2.34.4/+esm'),import('https://cdn.jsdelivr.net/npm/three@0.171.0/+esm')]);
   const states=await fetch('assets/india-states-lite.geojson').then(r=>r.json()).catch(()=>({features:[]}));
   globe=Globe({animateIn:false})(holder)
     .backgroundColor('rgba(0,0,0,0)')
     .showGlobe(false).showAtmosphere(false)
-    .polygonsData(states.features).polygonCapColor(()=>'rgba(253,153,7,.22)').polygonSideColor(()=>'rgba(0,0,0,0)').polygonStrokeColor(()=>'rgba(214,120,0,.85)').polygonAltitude(.004)
-    .ringLat('lat').ringLng('lon').ringAltitude(.013).ringColor(d=>{const c=COLORS[d.type]||'#fd9907';return t=>c+Math.round((1-t)*255).toString(16).padStart(2,'0')}).ringMaxRadius(d=>d===visible[pos]?3.2:2).ringPropagationSpeed(2.2).ringRepeatPeriod(900)
+    .polygonsData(states.features.filter(f=>!/Andaman|Lakshadweep/.test(f.properties.NAME_1))).polygonCapColor(()=>'rgba(0,0,0,0)').polygonSideColor(()=>'#4a4232').polygonStrokeColor(()=>'rgba(255,255,255,.28)').polygonAltitude(SLAB)
+    .ringLat('lat').ringLng('lon').ringAltitude(SLAB+.002).ringColor(d=>{const c=COLORS[d.type]||'#fd9907';return t=>c+Math.round((1-t)*255).toString(16).padStart(2,'0')}).ringMaxRadius(d=>d===visible[pos]?3.2:2).ringPropagationSpeed(2.2).ringRepeatPeriod(900)
     .pointLat('lat').pointLng('lon').pointColor(d=>COLORS[d.type]||'#fd9907').pointsMerge(false)
     .pointLabel(d=>`<div class="ag-globe__tip"><strong>${d.company}</strong><span>${d.city} · ${d.type}</span></div>`)
     .onPointClick(d=>{pos=visible.indexOf(d);show()})
     .onPointHover(d=>{holder.style.cursor=d?'pointer':'grab'});
+  const tex=new THREE.TextureLoader().load('assets/india-relief.webp');tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=globe.renderer().capabilities.getMaxAnisotropy();
+  globe.tilesData([{lat:21.75,lng:83,w:30,h:31.5}]).tileLat('lat').tileLng('lng').tileWidth('w').tileHeight('h').tileAltitude(SLAB-.0004).tileCurvatureResolution(1)
+    .tileMaterial(()=>new THREE.MeshBasicMaterial({map:tex,alphaTest:.5}));
   const controls=globe.controls();controls.enableZoom=true;controls.minDistance=130;controls.maxDistance=360;controls.autoRotate=false;
   size();globe.pointOfView(HOME,0);drawPoints();fly(visible,1500);stage.classList.add('is-ready');
   addEventListener('resize',size,{passive:true})}catch(e){stage.classList.add('is-failed')}}
