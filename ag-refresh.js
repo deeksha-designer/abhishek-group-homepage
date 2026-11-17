@@ -46,7 +46,7 @@ const unique=key=>[...new Set(data.map(d=>d[key]))].sort();
 for(const[key,select]of Object.entries(selects))unique(key).forEach(v=>select.add(new Option(v,v)));
 legend.innerHTML=Object.entries(COLORS).map(([t,c])=>`<li><span style="background:${c}"></span>${t}</li>`).join('');
 let visible=data,pos=0,globe=null;
-const HOME={lat:20,lng:80,altitude:2.1};
+const HOME={lat:22.5,lng:81,altitude:.62};
 function fly(list,ms=1200){if(!globe)return;if(!list.length||list.length===data.length){globe.pointOfView(HOME,ms);return}
   const lats=list.map(d=>d.lat),lngs=list.map(d=>d.lon),span=Math.max(Math.max(...lats)-Math.min(...lats),Math.max(...lngs)-Math.min(...lngs));
   globe.pointOfView({lat:(Math.max(...lats)+Math.min(...lats))/2,lng:(Math.max(...lngs)+Math.min(...lngs))/2,altitude:Math.min(1.4,Math.max(.45,span/14))},ms)}
@@ -65,10 +65,8 @@ async function init(){try{await loadScript('https://cdn.jsdelivr.net/npm/globe.g
   const states=await fetch('assets/india-states-lite.geojson').then(r=>r.json()).catch(()=>({features:[]}));
   globe=Globe({animateIn:false})(holder)
     .backgroundColor('rgba(0,0,0,0)')
-    .globeImageUrl('https://cdn.jsdelivr.net/npm/three-globe@2.31.1/example/img/earth-dark.jpg')
-    .bumpImageUrl('https://cdn.jsdelivr.net/npm/three-globe@2.31.1/example/img/earth-topology.png')
-    .showAtmosphere(true).atmosphereColor('#7cc4ff').atmosphereAltitude(.16)
-    .polygonsData(states.features).polygonCapColor(()=>'rgba(253,153,7,.6)').polygonSideColor(()=>'rgba(0,0,0,0)').polygonStrokeColor(()=>'rgba(255,255,255,.75)').polygonAltitude(.004)
+    .showGlobe(false).showAtmosphere(false)
+    .polygonsData(states.features).polygonCapColor(()=>'rgba(253,153,7,.22)').polygonSideColor(()=>'rgba(0,0,0,0)').polygonStrokeColor(()=>'rgba(214,120,0,.85)').polygonAltitude(.004)
     .ringLat('lat').ringLng('lon').ringAltitude(.013).ringColor(d=>{const c=COLORS[d.type]||'#fd9907';return t=>c+Math.round((1-t)*255).toString(16).padStart(2,'0')}).ringMaxRadius(d=>d===visible[pos]?3.2:2).ringPropagationSpeed(2.2).ringRepeatPeriod(900)
     .pointLat('lat').pointLng('lon').pointColor(d=>COLORS[d.type]||'#fd9907').pointsMerge(false)
     .pointLabel(d=>`<div class="ag-globe__tip"><strong>${d.company}</strong><span>${d.city} · ${d.type}</span></div>`)
