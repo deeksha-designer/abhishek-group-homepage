@@ -26,6 +26,7 @@
 #main .ag-btn--outline:hover,#main .ag-btn--outline:focus-visible{border-color:var(--ag-orange);background:var(--ag-orange);color:#fff}
 #main .ag-btn--light{border-color:#fff;color:#fff}
 #main .ag-btn--sm{min-height:46px;padding:0 24px;gap:12px;font-size:15px}
+#main section.news{background:none;border-image:linear-gradient(180deg,#f2f2f2 0%,#fff 100%) fill 0//0 100vw}
 #main .news .section-heading>a.ag-btn{align-self:flex-end;flex:0 0 auto;width:auto}
 #main .news-grid article{display:flex;flex-direction:column;align-items:flex-start}
 #main .news-grid article h3{display:-webkit-box;margin:24px 0 36px;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:60px}
