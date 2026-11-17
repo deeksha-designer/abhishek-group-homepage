@@ -2,65 +2,39 @@ const header=document.querySelector('.site-header');
 addEventListener('scroll',()=>header.classList.toggle('scrolled',scrollY>40),{passive:true});
 
 const hamburger=document.querySelector('.hamburger'),menuPanel=document.querySelector('.menu-panel');
-function setMenu(open){hamburger.setAttribute('aria-expanded',String(open));hamburger.setAttribute('aria-label',open?'Close menu':'Open menu');menuPanel.inert=!open;menuPanel.setAttribute('aria-hidden',String(!open));menuPanel.classList.toggle('open',open);document.body.classList.toggle('menu-open',open)}
+function setMenu(open){hamburger.setAttribute('aria-expanded',String(open));hamburger.setAttribute('aria-label',open?'Close menu':'Open menu');menuPanel.hidden=!open;menuPanel.classList.toggle('open',open);document.body.classList.toggle('menu-open',open)}
 hamburger.addEventListener('click',()=>setMenu(hamburger.getAttribute('aria-expanded')!=='true'));
 menuPanel.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>setMenu(false)));
 document.addEventListener('keydown',event=>{if(event.key==='Escape')setMenu(false)});
+menuPanel.querySelectorAll('.menu-disclosure>button').forEach(button=>{const submenu=button.nextElementSibling;submenu.hidden=true;button.addEventListener('click',()=>{const open=button.getAttribute('aria-expanded')==='true';button.setAttribute('aria-expanded',String(!open));submenu.hidden=open})});
 
-/* Hero: Mobis-style horizontal slider (0.5s ease slide, 6s autoplay, bg zoom, line reveal) */
+const slides=[...document.querySelectorAll('.hero-slide')],bars=[...document.querySelectorAll('.slide-dots button')];
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const mv=document.querySelector('.mv'),mvSlides=[...mv.querySelectorAll('.mv-slide')],mvDots=[...mv.querySelectorAll('.mv-dots button')],mvPause=mv.querySelector('.mv-pause');
-let mvIndex=0,mvBusy=false,mvAuto=!reducedMotion,mvTimer;
-mv.classList.add('mv-first');
-function mvGo(next,dir){
- next=(next+mvSlides.length)%mvSlides.length;if(next===mvIndex||mvBusy)return;
- dir=dir||(next>mvIndex?1:-1);mv.classList.remove('mv-first');
- const cur=mvSlides[mvIndex],nxt=mvSlides[next];
- if(reducedMotion){cur.classList.remove('is-active');nxt.classList.add('is-active')}
- else{
-  mvBusy=true;nxt.style.transition='none';nxt.style.transform=`translateX(${dir*100}%)`;nxt.style.visibility='visible';nxt.offsetWidth;
-  const ease='transform .5s ease';cur.style.transition=ease;nxt.style.transition=ease;
-  cur.style.transform=`translateX(${-dir*100}%)`;nxt.style.transform='translateX(0)';
-  cur.classList.remove('is-active');nxt.classList.add('is-active');
-  setTimeout(()=>{[cur,nxt].forEach(el=>{el.style.transition='';el.style.transform='';el.style.visibility=''});mvBusy=false},520);
- }
- cur.setAttribute('aria-hidden','true');nxt.removeAttribute('aria-hidden');
- mvDots.forEach((d,i)=>{d.classList.toggle('is-active',i===next);d.setAttribute('aria-selected',String(i===next))});
- mvIndex=next;if(mvAuto)mvRestart();
-}
-function mvRestart(){clearInterval(mvTimer);mvTimer=setInterval(()=>mvGo(mvIndex+1,1),6000)}
-mvDots.forEach((d,i)=>d.addEventListener('click',()=>mvGo(i)));
-mv.querySelector('.mv-next').addEventListener('click',()=>mvGo(mvIndex+1,1));
-mv.querySelector('.mv-prev').addEventListener('click',()=>mvGo(mvIndex-1,-1));
-mvPause.addEventListener('click',()=>{mvAuto=!mvAuto;mvPause.classList.toggle('is-paused',!mvAuto);mvPause.setAttribute('aria-label',mvAuto?'Pause slider':'Play slider');mvAuto?mvRestart():clearInterval(mvTimer)});
-if(mvAuto)mvRestart();
-document.addEventListener('visibilitychange',()=>document.hidden?clearInterval(mvTimer):mvAuto&&mvRestart());
+let slideIndex=0,autoplay=!reducedMotion,slideTimer;
+function showSlide(index){slideIndex=(index+slides.length)%slides.length;slides.forEach((slide,i)=>{slide.classList.toggle('active',i===slideIndex);slide.setAttribute('aria-hidden',String(i!==slideIndex))});bars.forEach((bar,i)=>{bar.classList.toggle('active',i===slideIndex);bar.setAttribute('aria-selected',String(i===slideIndex))});if(autoplay)restartSlider()}
+function restartSlider(){clearInterval(slideTimer);slideTimer=setInterval(()=>showSlide(slideIndex+1),6000)}
+bars.forEach((bar,index)=>bar.addEventListener('click',()=>showSlide(index)));
+document.querySelector('.next').addEventListener('click',()=>showSlide(slideIndex+1));
+document.querySelector('.prev').addEventListener('click',()=>showSlide(slideIndex-1));
+const playButton=document.querySelector('.play-toggle');
+playButton.addEventListener('click',()=>{autoplay=!autoplay;playButton.innerHTML=autoplay?'<i class="fa-solid fa-pause" aria-hidden="true"></i>':'<i class="fa-solid fa-play" aria-hidden="true"></i>';playButton.setAttribute('aria-label',autoplay?'Pause slider':'Play slider');document.querySelector('.slide-dots').classList.toggle('paused',!autoplay);autoplay?restartSlider():clearInterval(slideTimer)});
+if(autoplay)restartSlider();
+document.addEventListener('visibilitychange',()=>document.hidden?clearInterval(slideTimer):autoplay&&restartSlider());
+document.querySelectorAll('[data-route-slide]').forEach(route=>{route.addEventListener('pointerenter',()=>{clearInterval(slideTimer);showSlide(Number(route.dataset.routeSlide));clearInterval(slideTimer)});route.addEventListener('pointerleave',()=>autoplay&&restartSlider());route.addEventListener('focus',()=>showSlide(Number(route.dataset.routeSlide)))});
 
-/* Companies: Ageeva-style list + MadeByShape-style stacking cards on scroll */
-const bizStack=document.querySelector('.biz-stack'),bizCards=[...document.querySelectorAll('.biz-card')],bizItems=[...document.querySelectorAll('.biz-item')];
-let bizActive=-1,bizTick=false;
-function bizStickyTop(card){return parseFloat(getComputedStyle(card).top)||0}
-function bizUpdate(){
- bizTick=false;let active=0;
- bizCards.forEach((card,i)=>{const top=card.getBoundingClientRect().top;if(top<=bizStickyTop(card)+2)active=i;
-  const next=bizCards[i+1];let scale=1;
-  if(next&&!reducedMotion){const range=card.offsetHeight||1,d=next.getBoundingClientRect().top-bizStickyTop(next);const p=Math.min(1,Math.max(0,1-d/range));scale=1-p*.06}
-  card.style.setProperty('--biz-scale',scale.toFixed(4));card.style.setProperty('--biz-dim',((1-scale)*2).toFixed(3));
- });
- if(active!==bizActive){bizActive=active;bizItems.forEach((b,i)=>{b.classList.toggle('is-active',i===active);b.setAttribute('aria-current',String(i===active))})}
-}
-addEventListener('scroll',()=>{if(!bizTick){bizTick=true;requestAnimationFrame(bizUpdate)}},{passive:true});
-addEventListener('resize',bizUpdate,{passive:true});bizUpdate();
-bizItems.forEach((b,i)=>b.addEventListener('click',()=>{const first=bizCards[0],cs=getComputedStyle(first),step=first.offsetHeight+parseFloat(cs.marginBottom||0);const natural=bizStack.getBoundingClientRect().top+scrollY+i*step;scrollTo({top:natural-bizStickyTop(bizCards[i])+1,behavior:reducedMotion?'auto':'smooth'})}));
+const companyPanels=[...document.querySelectorAll('.company-panel')],companySticky=document.querySelector('.company-sticky');
+if(companyPanels.length&&companySticky){const activateCompany=panel=>{companyPanels.forEach(item=>item.classList.toggle('active',item===panel));companySticky.querySelector('img').src=panel.dataset.logo;companySticky.querySelector('h3').textContent=panel.dataset.name;companySticky.querySelector('p').textContent=panel.dataset.description};const companyObserver=new IntersectionObserver(entries=>{const current=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(current)activateCompany(current.target)},{threshold:[.35,.55,.75]});companyPanels.forEach(panel=>companyObserver.observe(panel));activateCompany(companyPanels[0])}
 
-const locationData={Gurugram:['Headquarters · Haryana','Corporate headquarters and central business office.','assets/facility.avif'],Vadodara:['Listed operation · Gujarat','Abhishek Group operation listed in Vadodara.','assets/operations.avif'],Nashik:['Listed operation · Maharashtra','Abhishek Group operation listed in Nashik.','assets/facility.avif'],Bhubaneshwar:['Listed operation · Odisha','Abhishek Group operation listed in Bhubaneshwar.','assets/operations.avif'],Kancheepuram:['Listed operation · Tamil Nadu','Abhishek Group operation listed in Kancheepuram.','assets/facility.avif']};
-const mapStage=document.querySelector('.world-map-stage'),indiaHotspot=document.querySelector('.india-hotspot'),mapBack=document.querySelector('.map-back'),mapLocations=[...document.querySelectorAll('.map-location')],mapInfo=document.querySelector('.map-info');
-function setMapZoom(zoomed){mapStage.classList.toggle('zoomed',zoomed);mapBack.hidden=!zoomed;document.querySelector('.map-locations').setAttribute('aria-hidden',String(!zoomed))}
-indiaHotspot.addEventListener('click',()=>setMapZoom(true));mapBack.addEventListener('click',()=>setMapZoom(false));
-mapLocations.forEach(pin=>pin.addEventListener('click',()=>{const name=pin.dataset.location,data=locationData[name];mapLocations.forEach(item=>item.classList.toggle('active',item===pin));mapInfo.querySelector('img').src=data[2];mapInfo.querySelector('small').textContent=`${pin.dataset.company} · ${pin.dataset.type}`;mapInfo.querySelector('h3').textContent=name;mapInfo.querySelector('p').textContent=data[1];mapInfo.querySelector('a').href=`https://maps.google.com/?q=${encodeURIComponent(name+', India')}`}));
-const presenceFilters=[...document.querySelectorAll('.presence-filters select')];
-function filterMapLocations(){const [state,type,company]=presenceFilters.map(select=>select.value);mapLocations.forEach(pin=>{const visible=(state==='all'||pin.dataset.state===state)&&(type==='all'||pin.dataset.type===type)&&(company==='all'||pin.dataset.company===company);pin.hidden=!visible});if(!mapStage.classList.contains('zoomed'))setMapZoom(true)}
-presenceFilters.forEach(select=>select.addEventListener('change',filterMapLocations));
+const locations=[
+['AWL Pvt Ltd','New Delhi','Delhi','Office',28.63156,77.22737,'World Trade Center, 514 Fifth, Babar Rd, Connaught Place, New Delhi, Delhi 110001','assets/company-photo-3.png'],['Luster Automotive Pvt Ltd','Gurugram','Haryana','Plant',28.50021,77.07338,'Plot No. 380, 381, Electronic City, Phase IV, Udyog Vihar, Sector 18, Gurugram, Haryana 122015','assets/company-photo-2.png'],['Abhishek K Kaiho Recyclers Pvt Ltd','Fatehpur','Haryana','Plant',28.25911,76.91492,'Fatehpur, Haryana 122015','assets/company-photo-4.png'],['Abhishek Group Pvt Ltd','Gurugram','Haryana','Head Office',28.50021,77.07338,'Plot No. 381, Electronic City, Phase IV, Udyog Vihar, Sector 18, Gurugram, Haryana 122015','assets/facility.avif'],['Abhishek Elektrosil Auto Components Pvt Ltd','Gurugram','Haryana','Plant',28.36987,76.92783,'Plot no-100, Sector 5, IMT Manesar, Gurugram, Haryana 122052','assets/company-photo-6.jpg'],['Joyson Anand Abhishek Safety Systems Pvt Ltd','Gurugram','Haryana','Plant',28.36701,76.92867,'Plot No 20, Sector 5, IMT Manesar, Gurugram, Haryana 122050','assets/company-photo-1.png'],['Joyson Anand Abhishek Safety Systems Pvt Ltd','Majrakath','Rajasthan','Plant',27.96762,76.39426,'X98V+JJV, Majrakath, Rajasthan 301020','assets/company-photo-1.png'],['Joyson Anand Abhishek Safety Systems Pvt Ltd','Kancheepuram','Tamil Nadu','Plant',12.70072,80.00886,'Survey No. 43/4, 215-Thennur Village, Chengalpattu, Kancheepuram, Tamil Nadu 603002','assets/company-photo-1.png'],['Abhishek K Road System Pvt Ltd','Gurugram','Haryana','Mother Plant',28.37735,76.92417,'Plot No. 149, Sector 6, IMT Manesar, Gurugram, Haryana 122052','assets/company-photo-5.png'],
+['Abhishek K Road System Pvt Ltd','Rourkela','Odisha','Embossing Station',22.22427,84.84312,'Uditnagar, Rourkela, Odisha 769012','assets/company-photo-5.png'],['Abhishek K Road System Pvt Ltd','Bhubaneshwar','Odisha','Embossing Station',20.23441,85.81463,'Kapilprasad, BDA Colony, Bhubaneswar, Odisha 751002','assets/company-photo-5.png'],['Abhishek K Road System Pvt Ltd','Jalda','Odisha','Embossing Station',22.18353,86.67323,'Pathuri, Jalda, Odisha 757086','assets/company-photo-5.png'],['Abhishek K Road System Pvt Ltd','Sambalpur','Odisha','Embossing Station',21.48684,83.98308,'Budharaja, Sambalpur, Odisha 768004','assets/company-photo-5.png'],['Abhishek K Road System Pvt Ltd','Jeypore','Odisha','Embossing Station',18.85958,82.57841,'Nehru Nagar, Mill Street, Jeypore, Odisha 764003','assets/company-photo-5.png'],['Abhishek K Road System Pvt Ltd','Brahmapur','Odisha','Embossing Station',19.31549,84.80101,'Brahma Nagar, Brahmapur, Odisha 760001','assets/company-photo-5.png'],['Abhishek K Road System Pvt Ltd','Nashik','Maharashtra','Embossing Station',19.96478,73.75753,'Govind Nagar, Nashik, Maharashtra 422001','assets/company-photo-5.png'],['Abhishek K Road System Pvt Ltd','Kidgaon','Maharashtra','Embossing Station',17.73091,73.95770,'Kidgaon, Maharashtra 415015','assets/company-photo-5.png'],['Abhishek K Road System Pvt Ltd','Nagaon','Maharashtra','Embossing Station',16.76236,74.29187,'Hatkanangle, Kolhapur, Nagaon, Maharashtra 416122','assets/company-photo-5.png'],['Abhishek K Road System Pvt Ltd','Vadodara','Gujarat','Embossing Station',22.34200,73.21967,'Harni, Vadodara, Gujarat 390022','assets/company-photo-5.png'],['Abhishek K Road System Pvt Ltd','Bharuch','Gujarat','Embossing Station',21.72978,72.63328,'Vadadla, Bharuch, Gujarat 392015','assets/company-photo-5.png'],['Abhishek K Road System Pvt Ltd','Valsad','Gujarat','Embossing Station',20.59154,72.96167,'Atakpardi, Valsad, Gujarat 396007','assets/company-photo-5.png']];
+const mapSvg=document.querySelector('#india-map'),statesGroup=document.querySelector('#india-states'),markersGroup=document.querySelector('#india-markers'),locationList=document.querySelector('#location-list'),mapInfo=document.querySelector('.map-info'),presenceFilters=[...document.querySelectorAll('.presence-filters select')],svgNS='http://www.w3.org/2000/svg';
+const project=([lon,lat])=>[60+(lon-68)/29.5*500,40+(37.5-lat)/31*610];
+const ringPath=ring=>ring.map((point,index)=>`${index?'L':'M'}${project(point).join(' ')}`).join(' ')+'Z';
+fetch('assets/india-states-lite.geojson').then(r=>r.json()).then(geo=>geo.features.forEach(feature=>{const path=document.createElementNS(svgNS,'path'),coords=feature.geometry.coordinates;path.setAttribute('d',feature.geometry.type==='Polygon'?coords.map(ringPath).join(' '):coords.map(poly=>poly.map(ringPath).join(' ')).join(' '));path.setAttribute('class','india-state');statesGroup.append(path)}));
+function selectLocation(location){mapInfo.querySelector('img').src=location[7];mapInfo.querySelector('small').textContent=`${location[0]} · ${location[3]}`;mapInfo.querySelector('h3').textContent=location[1];mapInfo.querySelector('p').textContent=location[6];mapInfo.querySelector('a').href=`https://www.google.com/maps?q=${location[4]},${location[5]}`}
+function renderLocations(){const [state,type]=presenceFilters.map(select=>select.value),visible=locations.filter(l=>(state==='all'||l[2]===state)&&(type==='all'||l[3]===type));markersGroup.innerHTML='';locationList.innerHTML='';visible.forEach((l,index)=>{const [x,y]=project([l[5],l[4]]),g=document.createElementNS(svgNS,'g');g.setAttribute('class','map-marker');g.setAttribute('transform',`translate(${x} ${y})`);g.setAttribute('tabindex','0');g.setAttribute('role','button');g.setAttribute('aria-label',`${l[0]}, ${l[1]}`);g.innerHTML='<circle class="marker-pulse" r="12"></circle><circle r="5"></circle>';g.addEventListener('click',()=>selectLocation(l));g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectLocation(l)}});markersGroup.append(g);const button=document.createElement('button');button.type='button';button.textContent=`${l[1]} · ${l[0]}`;button.addEventListener('click',()=>selectLocation(l));locationList.append(button);if(index===0)selectLocation(l)});document.querySelector('#location-count').textContent=String(visible.length).padStart(2,'0')}
+presenceFilters.forEach(select=>select.addEventListener('change',renderLocations));renderLocations();
 
 const productTrack=document.querySelector('.product-grid'),productCards=[...productTrack.children],productPrev=document.querySelector('.product-prev'),productNext=document.querySelector('.product-next');
 let productIndex=0;
@@ -78,4 +52,4 @@ const newsGrid=document.querySelector('.news-grid'),newsTabs=[...document.queryS
 function renderNews(type='all'){const visible=type==='all'?newsItems:newsItems.filter(item=>item.type===type);newsGrid.innerHTML=visible.map(item=>`<article><img src="${item.image}" alt="${item.alt}"><small>${item.label}</small><h3>${item.title}</h3><a href="https://www.abhishekgroup.co.in/" target="_blank" rel="noopener">Read on the group site ↗</a></article>`).join('');newsTabs.forEach(tab=>{const active=tab.dataset.news===type;tab.classList.toggle('active',active);tab.setAttribute('aria-selected',String(active))})}
 newsTabs.forEach(tab=>tab.addEventListener('click',()=>renderNews(tab.dataset.news)));renderNews();
 
-if(!reducedMotion){document.documentElement.classList.add('motion-ready');const revealObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('in-view');revealObserver.unobserve(entry.target)}}),{threshold:.1,rootMargin:'0px 0px -5%'});document.querySelectorAll('.section>*:not(.biz-layout),.news-grid').forEach(element=>{element.classList.add('reveal');revealObserver.observe(element)})}
+if(!matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.classList.add('motion-ready');const revealObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('in-view');revealObserver.unobserve(entry.target)}}),{threshold:.1,rootMargin:'0px 0px -5%'});document.querySelectorAll('.section>*,.company-showcase,.news-grid').forEach(element=>{element.classList.add('reveal');revealObserver.observe(element)})}
