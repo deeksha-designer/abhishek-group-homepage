@@ -37,28 +37,25 @@ const p=video.play();if(p)p.catch(sync);sync()})();
 
 /* ---------- India network: filters + interactive map (MapLibre + OpenFreeMap, loaded on demand) ---------- */
 (()=>{const root=document.querySelector('.ag-map');if(!root)return;
-const stage=root.querySelector('.ag-map__stage'),holder=root.querySelector('.ag-globe'),legend=root.querySelector('.ag-globe__legend'),card=root.querySelector('.ag-map__card'),countEl=root.querySelector('#ag-map-count');
+const stage=root.querySelector('.ag-map__stage'),holder=root.querySelector('.ag-globe'),card=root.querySelector('.ag-map__card'),countEl=root.querySelector('#ag-map-count');
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const selects={state:root.querySelector('#ag-map-state'),type:root.querySelector('#ag-map-type'),company:root.querySelector('#ag-map-company')};
-const COLORS={'Head Office':'#fd9907','Office':'#ffd166','Plant':'#ff5a36','Mother Plant':'#ff8fab','Embossing Station':'#5ad1ff'};
 const photos={'Joyson Anand Abhishek Safety Systems':'assets/people.avif','Luster Automotive':'assets/product-seating.webp','AWL':'assets/product-manufacturing.webp','Abhishek K Kaiho Recyclers':'assets/vehicle-scrappage.jpg','Abhishek K Road System':'assets/hero-roads.png','Abhishek Elektrosil Auto Components':'assets/operations.avif','Abhishek Group':'assets/facility.avif'};
 const data=[...locations].sort((a,b)=>(b[3]==='Head Office')-(a[3]==='Head Office')).map(([company,city,state,type,lat,lon,address,image])=>{company=company.replace(/ Pvt Ltd$/,'');return{company,city,state,type,lat,lon,address,image:photos[company]||image}});
 const unique=key=>[...new Set(data.map(d=>d[key]))].sort();
 for(const[key,select]of Object.entries(selects))unique(key).forEach(v=>select.add(new Option(v,v)));
-legend.innerHTML=Object.entries(COLORS).map(([t,c])=>`<li><span style="background:${c}"></span>${t}</li>`).join('');
 let visible=data,pos=0,map=null;
 const INDIA=[[67.6,6.4],[97.5,35.7]];
 const pad=()=>innerWidth>900?{top:60,bottom:30,left:30,right:Math.min(380,stage.clientWidth*.34)}:{top:56,bottom:20,left:16,right:16};
 function fly(list,ms=1200){if(!map)return;let b=INDIA;
   if(list.length&&list.length<data.length){const lats=list.map(d=>d.lat),lngs=list.map(d=>d.lon);b=[[Math.min(...lngs),Math.min(...lats)],[Math.max(...lngs),Math.max(...lats)]]}
   map.fitBounds(b,{padding:pad(),maxZoom:8,duration:ms})}
-const geo=()=>({type:'FeatureCollection',features:visible.map((d,i)=>({type:'Feature',properties:{i,color:COLORS[d.type]||'#fd9907',active:i===pos?1:0},geometry:{type:'Point',coordinates:[d.lon,d.lat]}}))});
+const geo=()=>({type:'FeatureCollection',features:visible.map((d,i)=>({type:'Feature',properties:{i,active:i===pos?1:0},geometry:{type:'Point',coordinates:[d.lon,d.lat]}}))});
 function drawPoints(){const src=map&&map.getSource('ag-loc');src&&src.setData(geo())}
 function show(){const d=visible[pos];card.classList.toggle('is-empty',!d);
   if(!d){card.querySelector('h3').textContent='No locations found';card.querySelector('.ag-map__meta').textContent='';card.querySelector('.ag-map__address').textContent='Try a different state, location type or company.';drawPoints();return}
   const img=card.querySelector('img');img.src=d.image;img.alt=`${d.company}, ${d.city}`;
-  card.querySelector('h3').textContent=d.company;card.querySelector('.ag-map__meta').textContent=`${d.city} · ${d.type}`;card.querySelector('.ag-map__address').textContent=d.address;
-  card.querySelector('a').href=`https://www.google.com/maps/dir/?api=1&destination=${d.lat},${d.lon}`;drawPoints()}
+  card.querySelector('h3').textContent=d.company;card.querySelector('.ag-map__meta').textContent=`${d.city} · ${d.type}`;card.querySelector('.ag-map__address').textContent=d.address;drawPoints()}
 function filter(){const f={state:selects.state.value,type:selects.type.value,company:selects.company.value};visible=data.filter(d=>Object.entries(f).every(([k,v])=>v==='all'||d[k]===v));pos=0;countEl.textContent=visible.length;show();fly(visible)}
 Object.values(selects).forEach(s=>s.addEventListener('change',filter));
 filter();
@@ -75,11 +72,9 @@ async function init(){try{const LIB='https://cdn.jsdelivr.net/npm/maplibre-gl@4.
     const world=[[-180,-85],[180,-85],[180,85],[-180,85],[-180,-85]];
     map.addSource('ag-mask',{type:'geojson',data:{type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[world,...outline.features[0].geometry.coordinates.map(p=>p[0])]}}});
     map.addLayer({id:'ag-mask',type:'fill',source:'ag-mask',paint:{'fill-color':'#ffffff','fill-opacity':.62}},below);
-    map.addSource('ag-india',{type:'geojson',data:outline});
-    map.addLayer({id:'ag-india-line',type:'line',source:'ag-india',paint:{'line-color':'#fd9907','line-width':2}},below);
     map.addSource('ag-loc',{type:'geojson',data:geo()});
-    map.addLayer({id:'ag-pulse',type:'circle',source:'ag-loc',paint:{'circle-color':['get','color'],'circle-radius':8,'circle-opacity':.45}});
-    map.addLayer({id:'ag-dot',type:'circle',source:'ag-loc',paint:{'circle-color':['get','color'],'circle-radius':['case',['==',['get','active'],1],8,5.5],'circle-stroke-color':'#fff','circle-stroke-width':2}});
+    map.addLayer({id:'ag-pulse',type:'circle',source:'ag-loc',paint:{'circle-color':'#fd9907','circle-radius':8,'circle-opacity':.45}});
+    map.addLayer({id:'ag-dot',type:'circle',source:'ag-loc',paint:{'circle-color':'#fd9907','circle-radius':['case',['==',['get','active'],1],8,5.5],'circle-stroke-color':'#fff','circle-stroke-width':2}});
     const tip=new maplibregl.Popup({closeButton:false,closeOnClick:false,offset:12,className:'ag-map__popup'});
     map.on('mouseenter','ag-dot',e=>{map.getCanvas().style.cursor='pointer';const d=visible[e.features[0].properties.i];if(d)tip.setLngLat([d.lon,d.lat]).setHTML(`<div class="ag-globe__tip"><strong>${d.company}</strong><span>${d.city} · ${d.type}</span></div>`).addTo(map)});
     map.on('mouseleave','ag-dot',()=>{map.getCanvas().style.cursor='';tip.remove()});
@@ -93,5 +88,8 @@ if('IntersectionObserver'in window){const io=new IntersectionObserver(es=>{if(es
 /* ---------- Footer wordmark: fill the viewport width ---------- */
 (()=>{const mark=document.querySelector('.ag-footer__mark');if(!mark)return;const text=mark.querySelector('span');
 const fitMark=()=>{text.style.fontSize='100px';const w=text.getBoundingClientRect().width||1,target=document.documentElement.clientWidth*.97,px=100*target/w;mark.style.setProperty('--ag-mark-size',px+'px');text.style.fontSize='';mark.style.setProperty('--ag-mark-h',(px*.74)+'px')};
-fitMark();addEventListener('resize',fitMark,{passive:true});if(document.fonts)document.fonts.ready.then(fitMark)})();
+fitMark();addEventListener('resize',fitMark,{passive:true});if(document.fonts)document.fonts.ready.then(fitMark);
+if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+let ticking=false;const rise=()=>{ticking=false;const r=mark.getBoundingClientRect(),p=Math.min(1,Math.max(0,(innerHeight-r.top)/(r.height*.9)));text.style.transform=`translateY(${((1-p)*70).toFixed(2)}%)`;text.style.opacity=(.1+.9*p).toFixed(3)};
+addEventListener('scroll',()=>{if(!ticking){ticking=true;requestAnimationFrame(rise)}},{passive:true});rise()})();
 })();
